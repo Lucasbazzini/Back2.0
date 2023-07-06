@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 const { Schema } = mongoose;
 
 export const productsCollection = 'products'
@@ -21,13 +22,13 @@ const productsSchema = new Schema({
         const count = await mongoose.models[productsCollection].countDocuments({ code: value });
         return count === 0;
       },
-      message: 'The specified code is in use by another existing product',
+      message: 'El código especificado está en uso por otro producto existente',
     }
   },
   price: {
     type: Number,
     required: true,
-    min: [0, 'Price cannot be negative']
+    min: [0, 'El Precio no puede ser negativo']
   },
   status: {
     type: Boolean,
@@ -36,7 +37,7 @@ const productsSchema = new Schema({
   stock: {
     type: Number,
     required: true,
-    min: [0, 'El stock no puede ser negativo']
+    min: [0, 'El Stock no puede ser negativo']
   },
   category: {
     type: String,
@@ -48,6 +49,7 @@ const productsSchema = new Schema({
   }}
 );
 
+productsSchema.plugin(mongoosePaginate);
 
 const ProductsModel = mongoose.model(productsCollection, productsSchema);
 

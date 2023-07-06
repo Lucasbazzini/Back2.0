@@ -19,7 +19,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
 
-const MONGO = "mongodb+srv://LucasBazzini:<password>@cluster.ccdvok9.mongodb.net/?retryWrites=true&w=majority"
+const MONGO = "mongodb+srv://LucasBazzini:Lucas30ago03..@cluster.ccdvok9.mongodb.net/?retryWrites=true&w=majority"
 const connection = mongoose.connect(MONGO)
 
 app.engine('handlebars', handlebars.engine());

@@ -7,11 +7,12 @@ const productManager = new ProductManager();
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res) => { 
     try {
-        const {limit} = req.query;
-        const products = await productManager.getProducts(limit);
-        res.send({status: 1, products: products});
+        const { limit = 10, page = 1, sort, category, available } = req.query;
+        const baseUrl = `${req.protocol}://${req.get('host')}${req.originalUrl.split('?')[0]}`;
+        const products = await productManager.getProducts(limit, page, sort, category, available, baseUrl);        
+        res.send({status: 1, ...products});
     } catch (error) {
         res.status(500).send({status: 0, msg: error.message});
     }
@@ -35,7 +36,7 @@ router.post('/', uploader.array('thumbnails'), async (req, res) => {
         newProductFields.thumbnails = filesUrls;        
         const newProduct = await productManager.addProduct(newProductFields);
         productsUpdated(req.app.get('io'));
-        res.send({status: 1, msg: 'Producto agregado', product: newProduct});
+        res.send({status: 1, msg: 'Producto añadido con éxito', product: newProduct});
         } catch (error) {
         res.status(500).send({status: 0, msg: error.message});
     }
@@ -46,10 +47,10 @@ router.put('/:productId', async (req, res) => {
         const productId = req.params.productId;
         const updatedProductFields= req.body;
 
-        if (Object.keys(req.body).length === 0) throw new Error('Cuerpo de solicitud vacío');
+        if (Object.keys(req.body).length === 0) throw new Error('Empty request body');
         const updatedProduct = await productManager.updateProduct(productId, updatedProductFields);
         productsUpdated(req.app.get('io'));
-        res.send({status: 1, msg: 'Producto actualizado', product: updatedProduct});
+        res.send({status: 1, msg: 'Producto actualizado con éxito', product: updatedProduct});
     } catch (error) {
         res.status(404).send({status: 0, msg: error.message});
     }
@@ -60,7 +61,7 @@ router.delete('/:productId', async (req, res) => {
         const productId = req.params.productId;
         await productManager.deleteProduct(productId);
         productsUpdated(req.app.get('io'));
-        res.send({status: 1, msg: 'Producto eliminado'});
+        res.send({status: 1, msg: 'Producto eliminado con éxito'});
     } catch (error) {
         res.status(404).send({status: 0, msg: error.message});
     }
