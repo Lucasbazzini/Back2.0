@@ -6,7 +6,7 @@ const messageManager = new MessagesManager();
 
 const productsUpdated = async (io) => {
     const products = await productManager.getProducts();
-    io.emit('productsUpdated', products);    
+    io.emit('productsUpdated', products.products);  
 };
 
 const chat = async (socket, io) => {
@@ -20,7 +20,7 @@ const chat = async (socket, io) => {
         const { user, message } = data;
         const newMessage = await messageManager.addMessage(user, message);
         const messages = await messageManager.getMessages();
-        io.emit('messageLogs', messages); //a todos
+        io.emit('messageLogs', messages); 
     });
 };
 
