@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import usersModel from '../dao/models/users.model.js';
 import passport from 'passport';
 
 const router = Router();
@@ -11,18 +10,18 @@ router.post('/register', passport.authenticate('register', { failureRedirect: '/
         birthDate: req.user.birthDate,
         userRole: 'user'
     };
-    res.send({ status: 1, msg: "Nuevo cliente conectado" });
+    res.send({ status: 1, msg: "Nuevo usuario registrado" });
 })
 
 router.post('/login', passport.authenticate('login', { failureRedirect: '/api/sessions/authFailureLogin', failureFlash: true }), async (req, res) => {
-    if (!req.user) return res.status(400).send({ status: 0, msg: 'Error al conectar' });
+    if (!req.user) return res.status(400).send({ status: 0, msg: 'Error' });
     req.session.user = {
         name: `${req.user.firstName} ${req.user.lastName}`,
         email: req.user.email,
         birthDate: req.user.birthDate,
         userRole: req.user.userRole
     };
-    res.send({ status: 1, msg: 'Inicio de sesion exitoso', user: req.session.user });
+    res.send({ status: 1, msg: 'El usuario inició sesión con éxito', user: req.session.user });
 });
 
 router.post('/resetpassword', passport.authenticate('resetPassword', { failureRedirect: '/api/sessions/authFailureReset', failureFlash: true }), async (req, res) => {
@@ -31,7 +30,7 @@ router.post('/resetpassword', passport.authenticate('resetPassword', { failureRe
 
 router.post('/logout', (req, res) => {
     req.session.destroy();
-    res.send({ status: 1, msg: 'Cliente desconectado con éxito' });
+    res.send({ status: 1, msg: 'Usuario desconectado con exito ' });
 });
 
 router.get('/authFailureRegister', (req, res) => {
@@ -47,6 +46,21 @@ router.get('/authFailureLogin', (req, res) => {
 router.get('/authFailureReset', (req, res) => {
     const error = req.flash('error')[0];
     res.status(400).send({ status: 0, msg: error });
+});
+
+router.get('/github', passport.authenticate('github', { scope: ['user:email'] }), async (req, res) => { });
+
+router.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/api/sessions/githubFailure' }), async (req, res) => {
+    req.session.user = {
+        name: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        userRole: req.user.userRole
+    };
+    res.redirect('/products');
+});
+
+router.get('/githubFailure', (req, res) => {
+    res.status(400).send({ status: 0, msg: 'Fallo de autenticación de Github' });
 });
 
 export default router;

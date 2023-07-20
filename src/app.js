@@ -20,9 +20,6 @@ import flash from 'connect-flash';
 
 const PORT = 8080;
 
-const MONGO = "mongodb+srv://LucasBazzini:pass..@cluster.ccdvok9.mongodb.net/?retryWrites=true&w=majority" 
-const connection = mongoose.connect(MONGO)
-
 const app = express();
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
@@ -32,17 +29,18 @@ app.engine('handlebars', handlebars.engine());
 app.set('views', __dirname + '/views');
 app.set('view engine', 'handlebars');
 
-const mongo = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`;
+const MONGO = "mongodb+srv://LucasBazzini:pass..@cluster.ccdvok9.mongodb.net/?retryWrites=true&w=majority" 
+const connection = mongoose.connect(MONGO)
 
 mongoose.connect(mongo, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
 .then(() => {
-    console.log(`Conexión MongoDB exitosa a ${DB_NAME}`);
+    console.log(`MongoDB connection successful to ${DB_NAME} database`);
 })
 .catch(err => {
-    console.log(`No se puede conectar a MongoDB ${DB_NAME}`);
+    console.log(`Cannot connect to MongoDB ${DB_NAME} database`);
 });
 
 app.use(session({
@@ -55,15 +53,18 @@ app.use(session({
     saveUninitialized: false
 }))
 
+
 initializePassport(passport);
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+//Public folder config
 app.use('/files', express.static(path.join(__dirname, './public')));
 
+//Routes
 app.use('/api/alive', (req, res) => {
-    res.status(200).json({ status: 1, message: 'Servidor conectado' });
+    res.status(200).json({ status: 1, message: 'Flowery 4107 backend is alive' });
 });
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/products', productsRouter);
@@ -71,17 +72,21 @@ app.use('/api/carts', cartsRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/', viewsRouter);
 
+
+
+//Server config
 const serverHttp = app.listen(PORT, () => {
     displayRoutes(app);
-    console.log(`El servidor ahora está en el puerto ${PORT}`)
+    console.log(`Flowery 4107 Backend server is now up on port ${PORT}`)
 });
 
+//Socket.io config: link http server to socket.io server
 const io = new Server(serverHttp);
 
 app.set('io', io);
 
 io.on('connection', socket => {
-    console.log('Nuevo cliente conectado', socket.id);
+    console.log('New client connected', socket.id);
     productsUpdated(io);
     chat(socket, io);
 });
